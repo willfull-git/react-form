@@ -8,10 +8,6 @@
     flex-direction: column;
 }
 
-.container .input + .input {
-    margin-top: 20px;
-}
-
 .input, .button {
     width: 400px;
     padding: 5px 10px;
@@ -25,6 +21,10 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
 
+}
+
+.formRow {
+    margin-top: 20px;
 }
 
 .input {
@@ -41,4 +41,20 @@ input:-webkit-autofill:active {
     background-color: Gray;
     border: none;
     color: white;
+}
+
+.validationMessages {
+  padding-left: 0;
+  margin-top: .5em;
+  margin-bottom: 0;
+}
+
+.validationMessage {
+  list-style: none;
+  font-size: 11px;
+  color: IndianRed;
+}
+
+.validationMessage + .validationMessage {
+  margin-top: .3em;
 }

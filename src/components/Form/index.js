@@ -5,12 +5,20 @@ import validationMetchers from '../../constants/validationMatchers';
 const LoginForm = ({ inputs, validationRooles }) => {
   const [formData, setFormData] = useState(
     inputs.reduce(
-      (acc, input) => ({ ...acc, [input.name]: { value: "", valid: true } }),
+      (acc, input) => ({
+        ...acc,
+        [input.name]: {
+          value: "",
+          valid: true,
+          validationMessages: []
+        }
+      }),
       {}
     )
   );
   const [showValidation, setShowValidation] = useState(false);
 
+  // |--- Effects
   useEffect(() => {
     validateForm(formData);
   }, []);
@@ -37,6 +45,8 @@ const LoginForm = ({ inputs, validationRooles }) => {
       inputData = formData[name],
       inputValidationRooles = validationRooles[name];
 
+    formData[name].validationMessages = [];
+
     Object.entries(inputValidationRooles).forEach(([roole, rooleVal]) => {
       switch (roole) {
         case "required":
@@ -44,6 +54,7 @@ const LoginForm = ({ inputs, validationRooles }) => {
             formData[name].valid = true;
           } else {
             formData[name].valid = false;
+            formData[name].validationMessages.push('field is required');
           }
           break;
         case "match":
@@ -51,6 +62,7 @@ const LoginForm = ({ inputs, validationRooles }) => {
             formData[name].valid = true;
           } else {
             formData[name].valid = false;
+            formData[name].validationMessages.push(`bad ${name} format`);
           }
           break;
         case "sameAs":
@@ -60,6 +72,7 @@ const LoginForm = ({ inputs, validationRooles }) => {
           } else {
             formData[name].valid = false;
             formData[ inputValidationRooles.sameAs ].valid = false;
+            formData[name].validationMessages.push(`field must be the same as ${ inputValidationRooles.sameAs }`);
           }
           break;
         default:
@@ -82,14 +95,25 @@ const LoginForm = ({ inputs, validationRooles }) => {
       onSubmit={handleSubmit}
     >
       {inputs.map(({ name, type, placeholder }) => (
-        <input
-          key={name}
-          value={formData[name].value}
-          type={type}
-          placeholder={placeholder}
-          onInput={(e) => handleInput(e, name)}
-          className={classes.input +' '+ ((!formData[name].valid && showValidation)? classes.invalid: '')}
-        />
+        <div className={classes.formRow}>
+          <input
+            key={name}
+            value={formData[name].value}
+            type={type}
+            placeholder={placeholder}
+            onInput={(e) => handleInput(e, name)}
+            className={classes.input +' '+ ((!formData[name].valid && showValidation)? classes.invalid: '')}
+          />
+          { (!formData[name].valid && showValidation) &&
+            <ul className={classes.validationMessages}>
+              { formData[name].validationMessages.map((row, i) => 
+                <li className={classes.validationMessage} key={i}>
+                  { row }
+                </li>
+              )}
+            </ul>
+          }
+        </div>
       ))}
       <input className={classes.button} type="submit" value="Submit"/>
     </form>

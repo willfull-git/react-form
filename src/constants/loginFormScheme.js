@@ -26,12 +26,15 @@ const validationRooles = {
     required: true,
   },
   email: {
+    required: true,
     match: "email",
   },
   password: {
+    required: true,
     sameAs: "confirmPassword",
   },
   confirmPassword: {
+    required: true,
     sameAs: "password",
   },
 };
