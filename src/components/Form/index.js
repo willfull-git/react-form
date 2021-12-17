@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import classes from './styles.module.css';
+import validationMetchers from '../../constants/validationMatchers';
 
 const LoginForm = ({ inputs, validationRooles }) => {
   const [formData, setFormData] = useState(
@@ -8,6 +10,10 @@ const LoginForm = ({ inputs, validationRooles }) => {
     )
   );
   const [showValidation, setShowValidation] = useState(false);
+
+  useEffect(() => {
+    validateForm(formData);
+  }, []);
 
   // |--- Handlers
   const handleInput = (e, name) => {
@@ -29,10 +35,7 @@ const LoginForm = ({ inputs, validationRooles }) => {
   const validateInput = (name, formData) => {
     const 
       inputData = formData[name],
-      inputValidationRooles = validationRooles[name],
-      matchers = {
-        email: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
-      };
+      inputValidationRooles = validationRooles[name];
 
     Object.entries(inputValidationRooles).forEach(([roole, rooleVal]) => {
       switch (roole) {
@@ -44,7 +47,7 @@ const LoginForm = ({ inputs, validationRooles }) => {
           }
           break;
         case "match":
-          if( matchers.email.test(inputData.value) ){
+          if( validationMetchers.email.test(inputData.value) ){
             formData[name].valid = true;
           } else {
             formData[name].valid = false;
@@ -53,8 +56,10 @@ const LoginForm = ({ inputs, validationRooles }) => {
         case "sameAs":
           if( inputData.value===formData[rooleVal].value ){
             formData[name].valid = true;
+            formData[ inputValidationRooles.sameAs ].valid = true;
           } else {
             formData[name].valid = false;
+            formData[ inputValidationRooles.sameAs ].valid = false;
           }
           break;
         default:
@@ -64,8 +69,18 @@ const LoginForm = ({ inputs, validationRooles }) => {
     return formData;
   };
 
+  const validateForm = (formData) => {
+    Object.entries(formData).forEach(([key, value]) => {
+      validateInput(key, formData);
+    });
+  }
+
   return (
-    <form action="" onSubmit={handleSubmit}>
+    <form
+      className={classes.container}
+      action=""
+      onSubmit={handleSubmit}
+    >
       {inputs.map(({ name, type, placeholder }) => (
         <input
           key={name}
@@ -73,10 +88,10 @@ const LoginForm = ({ inputs, validationRooles }) => {
           type={type}
           placeholder={placeholder}
           onInput={(e) => handleInput(e, name)}
-          className={(!formData[name].valid && showValidation)? 'm-invalid': ''}
+          className={classes.input +' '+ ((!formData[name].valid && showValidation)? classes.invalid: '')}
         />
       ))}
-      <input type="submit" value="Submit"/>
+      <input className={classes.button} type="submit" value="Submit"/>
     </form>
   );
 };

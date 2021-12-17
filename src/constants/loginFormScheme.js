@@ -6,7 +6,7 @@ const inputs = [
   },
   {
     name: "email",
-    type: "email",
+    type: "text",
     placeholder: "Email",
   },
   {
