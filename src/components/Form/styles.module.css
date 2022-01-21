@@ -50,6 +50,7 @@ input:-webkit-autofill:active {
 }
 
 .validationMessage {
+  margin: 6px 0 0;
   list-style: none;
   font-size: 11px;
   color: IndianRed;

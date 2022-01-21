@@ -1,92 +1,25 @@
-import { useState, useEffect } from "react";
 import classes from './styles.module.css';
-import validationMetchers from '../../constants/validationMatchers';
+import useForm from '../../hooks/useForm';
 
-const LoginForm = ({ inputs, validationRooles }) => {
-  const [formData, setFormData] = useState(
-    inputs.reduce(
-      (acc, input) => ({
-        ...acc,
-        [input.name]: {
-          value: "",
-          valid: true,
-          validationMessages: []
-        }
-      }),
-      {}
-    )
-  );
-  const [showValidation, setShowValidation] = useState(false);
+const LoginForm = ({fieldsConfig}) => {
+  const {fields, showValidation, handlers: {onFocus, onChange, onBlur, onSubmit}} = useForm(fieldsConfig);
 
-  // |--- Effects
-  useEffect(() => {
-    validateForm(formData);
-  }, []);
+  const handleFocus = ({target: {name}}) => {
+    onFocus(name);
+  };
 
-  // |--- Handlers
-  const handleInput = (e, name) => {
-    const updatedFormData = { ...formData };
+  const handleChange = ({target: {name, value}}) => {
+    onChange(name, value);
+  };
 
-    updatedFormData[name].value = e.target.value;
-
-    setShowValidation(false);
-    setFormData( validateInput(name, updatedFormData) );
+  const handleBlur = ({target: {name}}) => {
+    onBlur(name);
   };
 
   const handleSubmit = (e) => {
-    setShowValidation(true);
-
     e.preventDefault();
-  }
-
-  // |--- Utils
-  const validateInput = (name, formData) => {
-    const 
-      inputData = formData[name],
-      inputValidationRooles = validationRooles[name];
-
-    formData[name].validationMessages = [];
-
-    Object.entries(inputValidationRooles).forEach(([roole, rooleVal]) => {
-      switch (roole) {
-        case "required":
-          if( inputData.value.length ){
-            formData[name].valid = true;
-          } else {
-            formData[name].valid = false;
-            formData[name].validationMessages.push('field is required');
-          }
-          break;
-        case "match":
-          if( validationMetchers.email.test(inputData.value) ){
-            formData[name].valid = true;
-          } else {
-            formData[name].valid = false;
-            formData[name].validationMessages.push(`bad ${name} format`);
-          }
-          break;
-        case "sameAs":
-          if( inputData.value===formData[rooleVal].value ){
-            formData[name].valid = true;
-            formData[ inputValidationRooles.sameAs ].valid = true;
-          } else {
-            formData[name].valid = false;
-            formData[ inputValidationRooles.sameAs ].valid = false;
-            formData[name].validationMessages.push(`field must be the same as ${ inputValidationRooles.sameAs }`);
-          }
-          break;
-        default:
-      }
-    });
-
-    return formData;
+    onSubmit();
   };
-
-  const validateForm = (formData) => {
-    Object.entries(formData).forEach(([key, value]) => {
-      validateInput(key, formData);
-    });
-  }
 
   return (
     <form
@@ -94,27 +27,23 @@ const LoginForm = ({ inputs, validationRooles }) => {
       action=""
       onSubmit={handleSubmit}
     >
-      {inputs.map(({ name, type, placeholder }) => (
-        <div className={classes.formRow}>
+      { Object.entries(fields).map(([_, {name, type, placeholder, value, errors}]) => (
+        <div key={name} className={classes.formRow}>
           <input
-            key={name}
-            value={formData[name].value}
+            value={value}
             type={type}
+            name={name}
             placeholder={placeholder}
-            onInput={(e) => handleInput(e, name)}
-            className={classes.input +' '+ ((!formData[name].valid && showValidation)? classes.invalid: '')}
+            onFocus={handleFocus}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className={classes.input}
           />
-          { (!formData[name].valid && showValidation) &&
-            <ul className={classes.validationMessages}>
-              { formData[name].validationMessages.map((row, i) => 
-                <li className={classes.validationMessage} key={i}>
-                  { row }
-                </li>
-              )}
-            </ul>
-          }
+          { showValidation && errors?.length ? (
+            errors.map((error) => <p key={name} className={classes.validationMessage}>{error}</p>)
+          ) : '' }
         </div>
-      ))}
+      )) }
       <input className={classes.button} type="submit" value="Submit"/>
     </form>
   );

@@ -1,15 +1,9 @@
-import { useState } from "react";
-import classes from "./App.module.css";
-import {
-  inputs as loginInputs,
-  validationRooles as loginValidationRooles,
-} from "./constants/loginFormScheme";
-
 import LoginForm from "./components/Form";
+import fieldsConfig from './constants/loginFormScheme';
 
-function App() {
+const App = () => {
   return (
-    <LoginForm inputs={loginInputs} validationRooles={loginValidationRooles} />
+    <LoginForm fieldsConfig={fieldsConfig} />
   );
 }
 
